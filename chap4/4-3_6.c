@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>     //atof
+#include <math.h>       //相关数学运算函数
+#include <string.h>     //strcmp
 
 #define MAXOP 100   //操作数或运算符最大长度
 #define NUMBER '0'  //标识找到一个数
+#define NAME 'n'    //标识找到一个库函数
 
 int getop(char []);
 void push(double);
 double pop(void);
 void clear(void);
+void mathFunc(char []);
 
 //逆波兰计算器
 int main(){
@@ -20,6 +24,9 @@ int main(){
         {
         case NUMBER:
             push(atof(s));
+            break;
+        case NAME:
+            mathFunc(s);
             break;
         case '+':
             push(pop()+pop());
@@ -75,6 +82,21 @@ int main(){
     return 0;
 }
 
+void mathFunc(char s[]){
+    double op2;
+    if(strcmp(s, "sin") == 0)
+        push(sin(pop()));
+    else if(strcmp(s, "cos") == 0)
+        push(cos(pop()));
+    else if(strcmp(s, "exp") == 0)
+        push(exp(pop()));
+    else if(strcmp(s, "pow") == 0){
+        op2 = pop();
+        push(pow(pop(), op2));
+    }
+    else printf("Error: %s is not supported\n", s);
+    return;
+}
 
 #define MAXVAL 100  //栈val最大深度
 
@@ -103,19 +125,33 @@ void clear(void){
 
 
 
-#include <ctype.h>
+#include <ctype.h>        //isdigit, islower
 
 int getch(void);
 void ungetch(int);
 //获取下一个运算符或操作数
 int getop(char s[]){
     int i, c;
+    //跳过空格
     while((s[0] = c = getch()) == ' ' || c == '\t')
         ;
     s[1] = '\0';
     i = 0;
+    //处理调用数学库函数情况以及s,d等操作符为单个小写字母情况
+    if(islower(c)){
+        while(islower(c = getch()))
+            s[++i] = c;
+        if(c != EOF)
+            ungetch(c);
+        s[i+1] = '\0';
+        if(strlen(s) > 1)//调用数学库函数
+            return NAME;
+        else    //单字母操作符
+            return c;
+    }
     if(!isdigit(c) && c!= '.' && c!='-')
-        return c;   //不是操作数
+        return c;   //单字符操作符
+    //处理负号两种情况
     if(c == '-'){
         if(isdigit(c = getch()) || c == '.'){   //负数
             s[++i] = c;
