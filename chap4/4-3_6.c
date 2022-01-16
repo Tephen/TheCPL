@@ -7,11 +7,12 @@
 int getop(char []);
 void push(double);
 double pop(void);
+void clear(void);
 
 //逆波兰计算器
 int main(){
     int type;
-    double op2;
+    double op1, op2;
     char s[MAXOP];
 
     while((type = getop(s)) != EOF){
@@ -44,6 +45,25 @@ int main(){
             else
                 printf("Error: zero divisor\n");
             break;
+        case '?':   //不弹出栈顶元素情况下打印
+            op2 = pop();
+            printf("\t%.8g\n",op2);
+            push(op2);
+            break;
+        case 'c':   //清空栈
+            clear();
+            break;
+        case 'd':   //复制栈顶元素
+            op2 = pop();
+            push(op2);
+            push(op2);
+            break;
+        case 's':   //交换栈顶两个元素
+            op2 = pop();
+            op1 = pop();
+            push(op2);
+            push(op1);
+            break;
         case '\n':
             printf("\t%.8g\n", pop());
             break;
@@ -75,6 +95,12 @@ double pop(void){
         return 0.0;
     }
 }
+void clear(void){
+    sp = 0;
+    return;
+}
+
+
 
 
 #include <ctype.h>
