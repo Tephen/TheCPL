@@ -15,9 +15,11 @@ void mathFunc(char []);
 
 //逆波兰计算器
 int main(){
-    int type;
-    double op1, op2;
+    int type, i, var = 0;   //var储存上一个输入的变量名如3 A =中储存A
+    double op1, op2, v;     //输入回车后将结果保存到变量v中
     char s[MAXOP];
+    double variables[26];   //支持26个大写英文字母的变量
+    for(i=0; i<26; i++) variables[i] = 0.0;
 
     while((type = getop(s)) != EOF){
         switch (type)
@@ -71,13 +73,30 @@ int main(){
             push(op2);
             push(op1);
             break;
+        case '=':
+            pop();  //pop出由push(variables[type-'A'])压入的变量的原值
+                    //2 A =时pop出A的值,非法表达式如 2 3 A时也pop出3
+            if(var >= 'A' && var <= 'Z')
+                variables[var-'A'] = pop();
+            else
+                printf("Error: no var name %c\n",var);
+            break;
         case '\n':
-            printf("\t%.8g\n", pop());
+            v = pop();
+            printf("\t%.8g\n", v);
             break;
         default:
-            printf("Error: unknown command %s\n", s);
+            if(type >= 'A' && type <= 'Z'){
+                push(variables[type-'A']);  //遇到相应变量时使用variables中保存的变量值,默认初始化为0.0
+            }
+            else if(type == 'v'){
+                push(v);
+            }
+            else
+                printf("Error: unknown command %s\n", s);
             break;
         }
+        var = type;
     }
     return 0;
 }
